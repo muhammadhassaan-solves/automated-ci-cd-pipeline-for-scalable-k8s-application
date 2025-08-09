@@ -44,10 +44,10 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
 
   deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
+  needs: build-and-push
+  runs-on: ubuntu-latest
+  if: github.ref == 'refs/heads/main'
+  steps:
     - uses: actions/checkout@v4
     - uses: azure/setup-kubectl@v3
       with:
@@ -55,6 +55,8 @@ jobs:
     - run: |
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+    - run: kubectl config view
+    - run: kubectl get nodes
     - run: |
         kubectl apply -f k8s-manifests/
-        kubectl rollout status deployment/cicd-app --timeout=300s
+        kubectl rollout status deployment/cicd-app --timeout=100s
