@@ -1,4 +1,4 @@
-<h1>Automated CI-CD Pipeline for Scalable Kubernetes Application</h1>
+<h1>Automated CI/CD Pipeline for Scalable Kubernetes Application</h1>
 
 
 <h2>Description</h2>
