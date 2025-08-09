@@ -1,0 +1,23 @@
+name: Rollback Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Revision number to rollback to'
+        required: false
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+    - run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+    - run: |
+        if [ -n "${{ github.event.inputs.revision }}" ]; then
+          kubectl rollout undo deployment/cicd-app --to-revision=${{ github.event.inputs.revision }}
+        else
+          kubectl rollout undo deployment/cicd-app
+        fi
