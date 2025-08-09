@@ -48,15 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v3
+      - name: Deploy to EC2 Minikube via SSH
+        uses: appleboy/ssh-action@v0.1.6
         with:
-          version: 'v1.28.0'
-      - run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
-      - run: kubectl config view
-      - run: kubectl get nodes
-      - run: |
-          kubectl apply -f k8s-manifests/
-          kubectl rollout status deployment/cicd-app --timeout=300s
+          host: ${{ secrets.EC2_HOST }}           # Your EC2 public IP
+          username: ubuntu                        # EC2 username
+          key: ${{ secrets.EC2_SSH_KEY }}        # Private SSH key (PEM content)
+          script: |
+            cd ~/k8s-cicd-lab
+            # Update image in deployment manifest to use Docker Hub image
+            sed -i 's|image: cicd-app:latest|image: '${{ secrets.DOCKER_USERNAME }}/cicd-app:latest'|g' k8s-manifests/deployment.yaml
+            kubectl apply -f k8s-manifests/
+            kubectl rollout status deployment/cicd-app --timeout=300s
