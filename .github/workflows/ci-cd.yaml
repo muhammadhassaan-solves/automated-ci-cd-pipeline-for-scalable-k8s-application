@@ -51,12 +51,12 @@ jobs:
       - name: Deploy to EC2 Minikube via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.EC2_HOST }}           # Your EC2 public IP
-          username: ubuntu                        # EC2 username
-          key: ${{ secrets.EC2_SSH_KEY }}        # Private SSH key (PEM content)
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/k8s-cicd-lab
-            # Update image in deployment manifest to use Docker Hub image
-            sed -i 's|image: cicd-app:latest|image: '${{ secrets.DOCKER_USERNAME }}/cicd-app:latest'|g' k8s-manifests/deployment.yaml
+            cd ~/k8s-cicd-lab || git clone https://github.com/muhammadhassaan-solves/automated-ci-cd-pipeline-for-scalable-k8s-application && cd k8s-cicd-lab
+            git pull origin main
+            sed -i 's|image: cicd-app:latest|image: ${{ secrets.DOCKER_USERNAME }}/cicd-app:latest|g' k8s-manifests/deployment.yaml
             kubectl apply -f k8s-manifests/
             kubectl rollout status deployment/cicd-app --timeout=300s
